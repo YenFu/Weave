@@ -1,0 +1,15 @@
+/* Sample CSS file to load fonts
+
+To compile CSS file to a SWF File, right click on this file from Flash Builder 
+and select Compile CSS to SWF
+*/
+@font-face {
+	src:url("verdana.ttf");
+	fontFamily: Verdana;
+	advancedAntiAliasing: true;
+}
+@font-face {
+	src:url("arial.ttf");
+	fontFamily: Arial;
+	advancedAntiAliasing: true;
+}

@@ -22,16 +22,10 @@ package weave
 	import flash.external.ExternalInterface;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
-	import mx.rpc.AsyncResponder;
-	import mx.rpc.AsyncToken;
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
-	
-	import nochump.util.zip.ZipEntry;
-	import nochump.util.zip.ZipFile;
 	
 	import weave.api.WeaveAPI;
 	import weave.api.core.IErrorManager;
@@ -69,7 +63,6 @@ package weave
 	import weave.data.StatisticsCache;
 	import weave.editors._registerAllLinkableObjectEditors;
 	import weave.services.URLRequestUtils;
-	import weave.utils.VectorUtils;
 	
 	/**
 	 * Weave contains objects created dynamically from a session state.
@@ -288,7 +281,7 @@ package weave
 					{
 						for each (var plugin:String in pluginURLs)
 						{
-							loadSWC(new URLRequest(plugin), handlePlugin);
+							LibraryUtils.loadSWC(new URLRequest(plugin), handlePlugin);
 						}
 					}
 					else
@@ -302,41 +295,5 @@ package weave
 			}
 		}
 
-		private static function loadSWC(url:URLRequest, callback:Function):void
-		{
-			WeaveAPI.URLRequestUtils.getURL(url, handleSwcResult, handleSwcFault, callback);
-		}
-		
-		private static function handleSwcResult(event:ResultEvent, token:Object = null):void
-		{
-			var zipFile:ZipFile = new ZipFile(event.result as ByteArray);
-			var catalog:XML = XML(zipFile.getInput(zipFile.getEntry("catalog.xml")));
-			
-			var defList:XMLList = catalog.descendants(new QName('http://www.adobe.com/flash/swccatalog/9', 'def'));
-			var idList:XMLList = defList.@id;
-			var names:Array = [];
-			for each (var id:String in idList)
-				names.push(id.split(':').join('.'));
-			names.sort();
-			function testNames(...names):void
-			{
-				for (var i:int = 0; i < names.length; i++)
-				{
-					if (ClassUtils.classImplements(names[i], getQualifiedClassName(ILinkableObject)))
-						trace(names[i], ClassUtils.getClassDefinition(names[i]));
-				}
-				if (token is Function)
-					token();
-			}
-			
-			var library:ByteArray = zipFile.getInput(zipFile.getEntry("library.swf"));
-			ClassUtils.loadSWF(library, testNames, names);
-		}
-		private static function handleSwcFault(event:FaultEvent, token:Object = null):void
-		{
-			trace(arguments)
-			if (token is Function)
-				token();
-		}
 	}
 }
