@@ -18,13 +18,77 @@ package weave.api
 	import flash.utils.ByteArray;
 
 	/**
-	 * This is a pair of static functions for reading and writing files in the Weave file format.
-	 * The Weave file format consists of a header followed by a compressed AMF3-serialized object.
+	 * This is a wrapper around a ByteArray for reading and writing data in the Weave file format.
 	 * 
 	 * @author adufilie
 	 */
 	public class WeaveFileFormat
 	{
+		public function WeaveFileFormat(input:ByteArray = null)
+		{
+			if (input)
+				_readFile(input);
+		}
+		
+		/**
+		 * This is a list of names corresponding to objects in the file.
+		 */
+		public var names:Array = [];
+		
+		/**
+		 * This is a list of objects in the file.
+		 */		
+		public var objects:Array = [];
+		
+		public function getObject(name:String):Object
+		{
+			var index:int = names.indexOf(name);
+			if (index < 0)
+				return null;
+			return objects[index];
+		}
+		
+		public function addObject(name:String, object:String):void
+		{
+			names.push(name);
+			objects.push(object);
+		}
+		
+		public function generateFile():ByteArray
+		{
+			var output:ByteArray = new ByteArray();
+//			output.writeInt(FORMAT_VERSION);
+//			output.writeObject(names);
+//			for (var i:int = 0; i < names.length; i++)
+//				output.writeObject(objects[i]);
+			return output;
+		}
+		
+		/**
+		 * 
+		 * The file format consists of an AMF3-serialized String header followed by a compressed AMF3 stream.
+		 * The compressed stream contains a series of objects as follows:
+		 *     formatVersion:int, objectNames:Array, obj0:Object, obj1:Object, obj2:Object, ...
+		 *  
+		 * @param input The contents of a Weave file.
+		 */		
+		private function _readFile(input:ByteArray):void
+		{
+			var version:int = input.readInt();
+			if (version == 0)
+			{
+				names = input.readObject() as Array;
+				objects = new Array(names.length);
+				for (var i:int = 0; i < names.length; i++)
+					objects[i] = input.readObject();
+			}
+		}
+		
+		/**
+		 * The format version can be used to detect old formats and should be incremented whenever the format is changed.
+		 */		
+		private static const FORMAT_VERSION:int = 0;
+		
 		/**
 		 * This string is used in the header of a Weave file.
 		 */

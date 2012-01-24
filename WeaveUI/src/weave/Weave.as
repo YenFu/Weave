@@ -238,7 +238,7 @@ package weave
 		/**
 		 * This function will create an object that can be saved to a file and recalled later with loadWeaveFileContent().
 		 */
-		public static function createWeaveFileContent():Object
+		public static function createWeaveFileContent():Array
 		{
 			// The "version" property can be used to detect old formats and should be incremented whenever the format is changed.
 			var content:Object = {
